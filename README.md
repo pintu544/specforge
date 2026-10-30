@@ -16,14 +16,13 @@ One command runs the factory on a spec file. It prints a live event trace and en
 
 From a spec like [`specs/taskledger-cli.md`](specs/taskledger-cli.md) the factory produces a complete TypeScript project (CLI or HTTP API, whatever the spec asks for): strict TypeScript sources under `src/`, a `node:test` suite under `test/`, and a gate of `tsc --noEmit && tsx --test` that must go green before the run can succeed.
 
-Two verified demo runs live under [`examples/`](examples/):
+A verified demo run lives under [`examples/taskledger`](examples/taskledger) — the generated project plus its `run-log.json` trace:
 
 | Example | Spec | Result | Time | Human interventions |
 |---|---|---|---|---|
-| TaskLedger CLI | `specs/taskledger-cli.md` | ✅ suite green, reviewer approved | 140 s | 0 |
-| Notes API (HTTP) | `specs/notes-api.md` | see `examples/notes-api/run-log.json` | — | 0 |
+| TaskLedger CLI | `specs/taskledger-cli.md` | ✅ suite green (18/18), reviewer approved, 0 fix rounds | 140 s | 0 |
 
-Each example folder contains the generated project plus its `run-log.json` trace.
+A second sample spec, [`specs/notes-api.md`](specs/notes-api.md) (an HTTP API), is included in `specs/`. Its best run reached 24/25 tests green; the remaining failure was an entry-point test that hung the suite — the hardest failure mode we found, documented honestly rather than hidden.
 
 ## The team
 
