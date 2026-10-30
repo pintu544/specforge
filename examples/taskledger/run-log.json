@@ -1,0 +1,574 @@
+{
+  "spec": "taskledger-cli.md",
+  "project": "taskledger-cli",
+  "success": true,
+  "note": "Test suite green and reviewer approved every acceptance criterion.",
+  "durationSec": 140,
+  "humanInterventions": 0,
+  "tasks": [
+    {
+      "id": "storage",
+      "module": "src/storage.ts",
+      "owner": "Builder-1",
+      "status": "done",
+      "fixRounds": 0,
+      "reviewFixRounds": 0,
+      "seconds": 29
+    },
+    {
+      "id": "stats",
+      "module": "src/stats.ts",
+      "owner": "Builder-2",
+      "status": "done",
+      "fixRounds": 0,
+      "reviewFixRounds": 0,
+      "seconds": 28
+    },
+    {
+      "id": "task-service",
+      "module": "src/task-service.ts",
+      "owner": "Builder-3",
+      "status": "done",
+      "fixRounds": 0,
+      "reviewFixRounds": 0,
+      "seconds": 30
+    },
+    {
+      "id": "cli",
+      "module": "src/cli.ts",
+      "owner": "Builder-2",
+      "status": "done",
+      "fixRounds": 0,
+      "reviewFixRounds": 0,
+      "seconds": 10
+    }
+  ],
+  "testRuns": [
+    {
+      "at": "2026-10-30T16:35:14.552Z",
+      "ok": true,
+      "tail": "a copied task, and saves it (31.536048ms)\n✔ addTask rejects an empty trimmed title and propagates storage errors (3.486466ms)\n✔ listTasks filters by status and tag without mutating stored tasks (6.394142ms)\n✔ completeTask marks a task done, preserves already-done tasks, and errors when not found (6.460272ms)\n✔ removeTask removes and returns the matching task and errors when not found (5.117244ms)\n✔ getStats returns computed stats for the current stored list and propagates errors (5.438828ms)\nℹ tests 18\nℹ suites 0\nℹ pass 18\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 2074.886237\n\n"
+    }
+  ],
+  "tokens": {
+    "input": 150718,
+    "output": 16459
+  },
+  "usageByAgent": {
+    "Planner": {
+      "input": 1265,
+      "output": 7036,
+      "calls": 1
+    },
+    "Builder-2": {
+      "input": 19106,
+      "output": 1807,
+      "calls": 6
+    },
+    "Builder-1": {
+      "input": 5226,
+      "output": 532,
+      "calls": 3
+    },
+    "Builder-3": {
+      "input": 8737,
+      "output": 849,
+      "calls": 3
+    },
+    "TestWriter": {
+      "input": 87708,
+      "output": 5894,
+      "calls": 16
+    },
+    "Reviewer": {
+      "input": 28676,
+      "output": 341,
+      "calls": 6
+    }
+  },
+  "events": [
+    {
+      "t": "2026-10-30T16:33:05.354Z",
+      "event": "participant.joined",
+      "producer": "Observer"
+    },
+    {
+      "t": "2026-10-30T16:33:05.355Z",
+      "event": "participant.joined",
+      "producer": "Planner"
+    },
+    {
+      "t": "2026-10-30T16:33:05.355Z",
+      "event": "participant.joined",
+      "producer": "Builder-1"
+    },
+    {
+      "t": "2026-10-30T16:33:05.356Z",
+      "event": "participant.joined",
+      "producer": "Builder-2"
+    },
+    {
+      "t": "2026-10-30T16:33:05.356Z",
+      "event": "participant.joined",
+      "producer": "Builder-3"
+    },
+    {
+      "t": "2026-10-30T16:33:05.356Z",
+      "event": "participant.joined",
+      "producer": "TestWriter"
+    },
+    {
+      "t": "2026-10-30T16:33:05.357Z",
+      "event": "participant.joined",
+      "producer": "TestRunner"
+    },
+    {
+      "t": "2026-10-30T16:33:05.357Z",
+      "event": "participant.joined",
+      "producer": "Reviewer"
+    },
+    {
+      "t": "2026-10-30T16:33:05.358Z",
+      "event": "message.sent",
+      "producer": "Operator",
+      "detail": "spec submitted"
+    },
+    {
+      "t": "2026-10-30T16:33:05.360Z",
+      "event": "message_received.completed",
+      "producer": "Planner"
+    },
+    {
+      "t": "2026-10-30T16:33:55.635Z",
+      "event": "model.answer",
+      "producer": "Planner"
+    },
+    {
+      "t": "2026-10-30T16:33:55.636Z",
+      "event": "plan.ready",
+      "producer": "Planner"
+    },
+    {
+      "t": "2026-10-30T16:33:55.636Z",
+      "event": "task.available",
+      "producer": "Planner",
+      "detail": "task=storage"
+    },
+    {
+      "t": "2026-10-30T16:33:55.637Z",
+      "event": "message_received.completed",
+      "producer": "Builder-1"
+    },
+    {
+      "t": "2026-10-30T16:33:55.637Z",
+      "event": "message_received.completed",
+      "producer": "Builder-2"
+    },
+    {
+      "t": "2026-10-30T16:33:55.638Z",
+      "event": "message_received.completed",
+      "producer": "Builder-3"
+    },
+    {
+      "t": "2026-10-30T16:33:55.638Z",
+      "event": "task.available",
+      "producer": "Planner",
+      "detail": "task=stats"
+    },
+    {
+      "t": "2026-10-30T16:33:55.638Z",
+      "event": "task.available",
+      "producer": "Planner",
+      "detail": "task=task-service"
+    },
+    {
+      "t": "2026-10-30T16:33:55.638Z",
+      "event": "task.available",
+      "producer": "Planner",
+      "detail": "task=cli"
+    },
+    {
+      "t": "2026-10-30T16:33:58.715Z",
+      "event": "function_call.started",
+      "producer": "Builder-2"
+    },
+    {
+      "t": "2026-10-30T16:33:58.717Z",
+      "event": "function_call.completed",
+      "producer": "Builder-2"
+    },
+    {
+      "t": "2026-10-30T16:33:59.116Z",
+      "event": "function_call.started",
+      "producer": "Builder-1"
+    },
+    {
+      "t": "2026-10-30T16:33:59.118Z",
+      "event": "function_call.completed",
+      "producer": "Builder-1"
+    },
+    {
+      "t": "2026-10-30T16:34:00.045Z",
+      "event": "function_call.started",
+      "producer": "Builder-2"
+    },
+    {
+      "t": "2026-10-30T16:34:00.276Z",
+      "event": "function_call.started",
+      "producer": "Builder-3"
+    },
+    {
+      "t": "2026-10-30T16:34:00.279Z",
+      "event": "function_call.completed",
+      "producer": "Builder-3"
+    },
+    {
+      "t": "2026-10-30T16:34:00.573Z",
+      "event": "function_call.started",
+      "producer": "Builder-1"
+    },
+    {
+      "t": "2026-10-30T16:34:01.692Z",
+      "event": "function_call.started",
+      "producer": "Builder-3"
+    },
+    {
+      "t": "2026-10-30T16:34:20.485Z",
+      "event": "function_call.completed",
+      "producer": "Builder-2"
+    },
+    {
+      "t": "2026-10-30T16:34:20.885Z",
+      "event": "function_call.completed",
+      "producer": "Builder-3"
+    },
+    {
+      "t": "2026-10-30T16:34:20.910Z",
+      "event": "function_call.completed",
+      "producer": "Builder-1"
+    },
+    {
+      "t": "2026-10-30T16:34:23.867Z",
+      "event": "model.answer",
+      "producer": "Builder-2"
+    },
+    {
+      "t": "2026-10-30T16:34:23.867Z",
+      "event": "task.completed",
+      "producer": "Builder-2",
+      "detail": "task=stats"
+    },
+    {
+      "t": "2026-10-30T16:34:23.868Z",
+      "event": "message_received.completed",
+      "producer": "TestWriter"
+    },
+    {
+      "t": "2026-10-30T16:34:24.617Z",
+      "event": "model.answer",
+      "producer": "Builder-1"
+    },
+    {
+      "t": "2026-10-30T16:34:24.617Z",
+      "event": "task.completed",
+      "producer": "Builder-1",
+      "detail": "task=storage"
+    },
+    {
+      "t": "2026-10-30T16:34:24.618Z",
+      "event": "message_received.completed",
+      "producer": "Builder-2"
+    },
+    {
+      "t": "2026-10-30T16:34:24.880Z",
+      "event": "function_call.started",
+      "producer": "TestWriter"
+    },
+    {
+      "t": "2026-10-30T16:34:24.881Z",
+      "event": "function_call.completed",
+      "producer": "TestWriter"
+    },
+    {
+      "t": "2026-10-30T16:34:25.253Z",
+      "event": "model.answer",
+      "producer": "Builder-3"
+    },
+    {
+      "t": "2026-10-30T16:34:25.253Z",
+      "event": "task.completed",
+      "producer": "Builder-3",
+      "detail": "task=task-service"
+    },
+    {
+      "t": "2026-10-30T16:34:27.936Z",
+      "event": "function_call.started",
+      "producer": "TestWriter"
+    },
+    {
+      "t": "2026-10-30T16:34:27.938Z",
+      "event": "function_call.completed",
+      "producer": "TestWriter"
+    },
+    {
+      "t": "2026-10-30T16:34:29.155Z",
+      "event": "function_call.started",
+      "producer": "TestWriter"
+    },
+    {
+      "t": "2026-10-30T16:34:30.261Z",
+      "event": "function_call.completed",
+      "producer": "TestWriter"
+    },
+    {
+      "t": "2026-10-30T16:34:30.644Z",
+      "event": "function_call.started",
+      "producer": "Builder-2"
+    },
+    {
+      "t": "2026-10-30T16:34:30.646Z",
+      "event": "function_call.completed",
+      "producer": "Builder-2"
+    },
+    {
+      "t": "2026-10-30T16:34:31.277Z",
+      "event": "model.answer",
+      "producer": "TestWriter"
+    },
+    {
+      "t": "2026-10-30T16:34:31.277Z",
+      "event": "tests.written",
+      "producer": "TestWriter",
+      "detail": "task=stats"
+    },
+    {
+      "t": "2026-10-30T16:34:31.278Z",
+      "event": "message_received.completed",
+      "producer": "TestWriter"
+    },
+    {
+      "t": "2026-10-30T16:34:32.543Z",
+      "event": "function_call.started",
+      "producer": "TestWriter"
+    },
+    {
+      "t": "2026-10-30T16:34:32.545Z",
+      "event": "function_call.completed",
+      "producer": "TestWriter"
+    },
+    {
+      "t": "2026-10-30T16:34:32.762Z",
+      "event": "function_call.started",
+      "producer": "Builder-2"
+    },
+    {
+      "t": "2026-10-30T16:34:33.782Z",
+      "event": "function_call.completed",
+      "producer": "Builder-2"
+    },
+    {
+      "t": "2026-10-30T16:34:35.112Z",
+      "event": "model.answer",
+      "producer": "Builder-2"
+    },
+    {
+      "t": "2026-10-30T16:34:35.112Z",
+      "event": "task.completed",
+      "producer": "Builder-2",
+      "detail": "task=cli"
+    },
+    {
+      "t": "2026-10-30T16:34:37.764Z",
+      "event": "function_call.started",
+      "producer": "TestWriter"
+    },
+    {
+      "t": "2026-10-30T16:34:37.767Z",
+      "event": "function_call.completed",
+      "producer": "TestWriter"
+    },
+    {
+      "t": "2026-10-30T16:34:38.925Z",
+      "event": "function_call.started",
+      "producer": "TestWriter"
+    },
+    {
+      "t": "2026-10-30T16:34:39.879Z",
+      "event": "function_call.completed",
+      "producer": "TestWriter"
+    },
+    {
+      "t": "2026-10-30T16:34:40.998Z",
+      "event": "model.answer",
+      "producer": "TestWriter"
+    },
+    {
+      "t": "2026-10-30T16:34:40.998Z",
+      "event": "tests.written",
+      "producer": "TestWriter",
+      "detail": "task=storage"
+    },
+    {
+      "t": "2026-10-30T16:34:41.000Z",
+      "event": "message_received.completed",
+      "producer": "TestWriter"
+    },
+    {
+      "t": "2026-10-30T16:34:46.343Z",
+      "event": "function_call.started",
+      "producer": "TestWriter"
+    },
+    {
+      "t": "2026-10-30T16:34:46.344Z",
+      "event": "function_call.completed",
+      "producer": "TestWriter"
+    },
+    {
+      "t": "2026-10-30T16:34:55.610Z",
+      "event": "function_call.started",
+      "producer": "TestWriter"
+    },
+    {
+      "t": "2026-10-30T16:34:55.612Z",
+      "event": "function_call.completed",
+      "producer": "TestWriter"
+    },
+    {
+      "t": "2026-10-30T16:34:57.047Z",
+      "event": "function_call.started",
+      "producer": "TestWriter"
+    },
+    {
+      "t": "2026-10-30T16:34:58.110Z",
+      "event": "function_call.completed",
+      "producer": "TestWriter"
+    },
+    {
+      "t": "2026-10-30T16:34:59.585Z",
+      "event": "model.answer",
+      "producer": "TestWriter"
+    },
+    {
+      "t": "2026-10-30T16:34:59.585Z",
+      "event": "tests.written",
+      "producer": "TestWriter",
+      "detail": "task=task-service"
+    },
+    {
+      "t": "2026-10-30T16:34:59.586Z",
+      "event": "message_received.completed",
+      "producer": "TestWriter"
+    },
+    {
+      "t": "2026-10-30T16:35:00.642Z",
+      "event": "function_call.started",
+      "producer": "TestWriter"
+    },
+    {
+      "t": "2026-10-30T16:35:00.644Z",
+      "event": "function_call.completed",
+      "producer": "TestWriter"
+    },
+    {
+      "t": "2026-10-30T16:35:07.231Z",
+      "event": "function_call.started",
+      "producer": "TestWriter"
+    },
+    {
+      "t": "2026-10-30T16:35:07.232Z",
+      "event": "function_call.completed",
+      "producer": "TestWriter"
+    },
+    {
+      "t": "2026-10-30T16:35:08.371Z",
+      "event": "function_call.started",
+      "producer": "TestWriter"
+    },
+    {
+      "t": "2026-10-30T16:35:09.470Z",
+      "event": "function_call.completed",
+      "producer": "TestWriter"
+    },
+    {
+      "t": "2026-10-30T16:35:10.506Z",
+      "event": "model.answer",
+      "producer": "TestWriter"
+    },
+    {
+      "t": "2026-10-30T16:35:10.506Z",
+      "event": "tests.written",
+      "producer": "TestWriter",
+      "detail": "task=cli"
+    },
+    {
+      "t": "2026-10-30T16:35:14.552Z",
+      "event": "tests.passed",
+      "producer": "TestRunner"
+    },
+    {
+      "t": "2026-10-30T16:35:14.554Z",
+      "event": "message_received.completed",
+      "producer": "Reviewer"
+    },
+    {
+      "t": "2026-10-30T16:35:16.968Z",
+      "event": "function_call.started",
+      "producer": "Reviewer"
+    },
+    {
+      "t": "2026-10-30T16:35:16.970Z",
+      "event": "function_call.completed",
+      "producer": "Reviewer"
+    },
+    {
+      "t": "2026-10-30T16:35:18.983Z",
+      "event": "function_call.started",
+      "producer": "Reviewer"
+    },
+    {
+      "t": "2026-10-30T16:35:18.984Z",
+      "event": "function_call.completed",
+      "producer": "Reviewer"
+    },
+    {
+      "t": "2026-10-30T16:35:20.638Z",
+      "event": "function_call.started",
+      "producer": "Reviewer"
+    },
+    {
+      "t": "2026-10-30T16:35:20.640Z",
+      "event": "function_call.completed",
+      "producer": "Reviewer"
+    },
+    {
+      "t": "2026-10-30T16:35:21.728Z",
+      "event": "function_call.started",
+      "producer": "Reviewer"
+    },
+    {
+      "t": "2026-10-30T16:35:21.735Z",
+      "event": "function_call.completed",
+      "producer": "Reviewer"
+    },
+    {
+      "t": "2026-10-30T16:35:23.336Z",
+      "event": "function_call.started",
+      "producer": "Reviewer"
+    },
+    {
+      "t": "2026-10-30T16:35:23.339Z",
+      "event": "function_call.completed",
+      "producer": "Reviewer"
+    },
+    {
+      "t": "2026-10-30T16:35:24.838Z",
+      "event": "model.answer",
+      "producer": "Reviewer"
+    },
+    {
+      "t": "2026-10-30T16:35:24.839Z",
+      "event": "build.complete",
+      "producer": "Reviewer"
+    }
+  ]
+}
