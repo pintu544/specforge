@@ -1,28 +1,13 @@
-export type Role = "organizer" | "customer";
-
-export type User = {
+export type UserRecord = {
   id: string;
   email: string;
+  emailLower: string;
   password: string;
   name: string;
-  role: Role;
+  role: "organizer" | "customer";
 };
 
-export type PublicUser = {
-  id: string;
-  email: string;
-  name: string;
-  role: Role;
-};
-
-export type Session = {
-  token: string;
-  userId: string;
-};
-
-export type EventStatus = "on_sale" | "cancelled";
-
-export type StoredTier = {
+export type EventTierRecord = {
   id: string;
   name: string;
   priceCents: number;
@@ -34,50 +19,9 @@ export type EventRecord = {
   title: string;
   venue: string;
   startsAt: string;
-  status: EventStatus;
+  status: "on_sale" | "cancelled";
   organizerId: string;
-  tiers: StoredTier[];
-};
-
-export type EventTier = {
-  id: string;
-  name: string;
-  priceCents: number;
-  quantity: number;
-  available: number;
-};
-
-export type Event = {
-  id: string;
-  title: string;
-  venue: string;
-  startsAt: string;
-  status: EventStatus;
-  organizerId: string;
-  tiers: EventTier[];
-};
-
-export type OrderStatus = "held" | "paid" | "expired" | "cancelled" | "refunded";
-
-export type OrderItem = {
-  tierId: string;
-  quantity: number;
-  unitPriceCents: number;
-};
-
-export type Order = {
-  id: string;
-  eventId: string;
-  customerId: string;
-  status: OrderStatus;
-  items: OrderItem[];
-  subtotalCents: number;
-  discountCode: string | null;
-  discountCents: number;
-  totalCents: number;
-  createdAt: string;
-  expiresAt: string;
-  paidAt: string | null;
+  tiers: EventTierRecord[];
 };
 
 export type DiscountRecord = {
@@ -89,132 +33,58 @@ export type DiscountRecord = {
   expiresAt: string | null;
 };
 
-export type Discount = {
-  code: string;
-  percentOff: number | null;
-  amountOffCents: number | null;
-  maxUses: number | null;
-  expiresAt: string | null;
-  uses: number;
+export type OrderItemRecord = {
+  tierId: string;
+  quantity: number;
+  unitPriceCents: number;
 };
 
-export type WaitlistEntryRecord = {
+export type OrderRecord = {
+  id: string;
+  eventId: string;
+  customerId: string;
+  status: "held" | "paid" | "expired" | "cancelled" | "refunded";
+  items: OrderItemRecord[];
+  subtotalCents: number;
+  discountCode: string | null;
+  discountCents: number;
+  totalCents: number;
+  createdAt: string;
+  expiresAt: string;
+  paidAt: string | null;
+};
+
+export type WaitlistRecord = {
   id: string;
   eventId: string;
   tierId: string;
   customerId: string;
   quantity: number;
-  createdAt: string;
-};
-
-export type WaitlistEntry = {
-  id: string;
-  eventId: string;
-  tierId: string;
-  quantity: number;
-  position: number;
-};
-
-export type EventReportTier = {
-  tierId: string;
-  name: string;
-  sold: number;
-  held: number;
-  available: number;
-};
-
-export type EventReport = {
-  eventId: string;
-  tiers: EventReportTier[];
-  grossCents: number;
-  discountCents: number;
-  refundedCents: number;
-  netCents: number;
-};
-
-export type CreateUserInput = {
-  email: string;
-  password: string;
-  name: string;
-  role: string;
-};
-
-export type CreateSessionInput = {
-  email: string;
-  password: string;
-};
-
-export type CreateEventTierInput = {
-  name: string;
-  priceCents: number;
-  quantity: number;
-};
-
-export type CreateEventInput = {
-  title: string;
-  venue: string;
-  startsAt: string;
-  tiers: CreateEventTierInput[];
-};
-
-export type ListEventsQuery = {
-  from?: string;
-  to?: string;
-  q?: string;
-  page?: string;
-  pageSize?: string;
-};
-
-export type PaginatedEvents = {
-  items: Event[];
-  page: number;
-  pageSize: number;
-  total: number;
-};
-
-export type CreateDiscountInput = {
-  code: string;
-  percentOff?: number;
-  amountOffCents?: number;
-  maxUses?: number;
-  expiresAt?: string;
-};
-
-export type CreateOrderItemInput = {
-  tierId: string;
-  quantity: number;
-};
-
-export type CreateOrderInput = {
-  eventId: string;
-  items: CreateOrderItemInput[];
-  discountCode?: string;
-};
-
-export type JoinWaitlistInput = {
-  tierId: string;
-  quantity: number;
 };
 
 export type Store = {
+  holdSeconds: number;
   nextId: number;
-  users: User[];
-  sessions: Session[];
-  events: EventRecord[];
-  orders: Order[];
-  discounts: DiscountRecord[];
-  waitlistEntries: WaitlistEntryRecord[];
+  users: Map<string, UserRecord>;
+  usersByEmailLower: Map<string, string>;
+  sessions: Map<string, string>;
+  events: Map<string, EventRecord>;
+  discountsByEventId: Map<string, Map<string, DiscountRecord>>;
+  orders: Map<string, OrderRecord>;
+  waitlistsByTierKey: Map<string, WaitlistRecord[]>;
 };
 
-export function createStore(): Store {
+export function createStore(holdSeconds: number): Store {
   return {
+    holdSeconds,
     nextId: 1,
-    users: [],
-    sessions: [],
-    events: [],
-    orders: [],
-    discounts: [],
-    waitlistEntries: [],
+    users: new Map(),
+    usersByEmailLower: new Map(),
+    sessions: new Map(),
+    events: new Map(),
+    discountsByEventId: new Map(),
+    orders: new Map(),
+    waitlistsByTierKey: new Map(),
   };
 }
 
