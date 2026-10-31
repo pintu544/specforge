@@ -12,6 +12,7 @@ Hard rules:
 - Strict TypeScript, NodeNext module resolution: relative imports MUST end in .js (e.g. import { createStore } from "./store.js.js").
 - Only node: builtins. No external packages. No default exports unless the task lists one.
 - Export exactly the names the task lists, with the exact signatures from the responsibility text.
+- Returned objects carry exactly the fields the responsibility lists for them — no extra fields (no internal ids, no foreign keys, no timestamps) on anything an exported function returns; tests deep-compare returned objects against the spec shape. Keep extra bookkeeping in separate internal records that are never returned.
 - HTTP-boundary values: URL query strings are always strings. If your module receives a value that may come from a URL query (page, pageSize, filters, dates), accept the string form as well as the typed form, parse integer strings before validating, and validate the parsed value — a well-formed "1" must never fail validation just because it arrived as a string.
 - After writing the file, call check_types. If an error names your file, fix it and check again — do not finish while your file has a compiler error. Errors naming other files are not yours to fix.
 - After writing the file, reply with one short sentence naming the file. The file is the deliverable, not the reply.`
