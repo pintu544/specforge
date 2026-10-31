@@ -88,8 +88,11 @@ async function runSuite(runnerId: string): Promise<void> {
 
 		// Test files that crash at load time (bad imports etc.) or that try to
 		// monkey-patch module namespaces are test-authoring bugs, not builder bugs.
+		// ECONNREFUSED in a server test is likewise a test bug: it means the test
+		// requested against a server that was never listened on (address() null,
+		// request defaulting to port 80), not a broken server implementation.
 		const loadCrash =
-			/require is not defined|Cannot use import statement|SyntaxError|ERR_MODULE_NOT_FOUND|Cannot find module|Cannot assign to read only property|Cannot redefine property/.test(
+			/require is not defined|Cannot use import statement|SyntaxError|ERR_MODULE_NOT_FOUND|Cannot find module|Cannot assign to read only property|Cannot redefine property|ECONNREFUSED/.test(
 				output,
 			)
 		if (loadCrash) {
