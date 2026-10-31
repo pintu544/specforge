@@ -17,6 +17,7 @@ Hard rules:
 - A field the responsibility defines as computed from other state (e.g. available = quantity minus tickets in held and paid orders) is recomputed from the underlying records on every return — never read back from a value stored when the object was created.
 - HTTP-boundary values: URL query strings are always strings. If your module receives a value that may come from a URL query (page, pageSize, filters, dates), accept the string form as well as the typed form, parse integer strings before validating, and validate the parsed value — a well-formed "1" must never fail validation just because it arrived as a string.
 - After writing the file, call check_types. If an error names your file, fix it and check again — do not finish while your file has a compiler error. Errors naming other files are not yours to fix.
+- If your module is the project entry point (the file npm start runs), start it UNCONDITIONALLY at top level. Never wrap the start in a main-module guard (process.argv[1] checks, import.meta.url comparisons): npm start runs the compiled .js output, so a guard matching the .ts source name never fires and the shipped program exits without starting.
 - After writing the file, reply with one short sentence naming the file. The file is the deliverable, not the reply.`
 
 function moduleMap(): string {
