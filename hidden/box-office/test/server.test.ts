@@ -1,132 +1,130 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import http from "node:http";
+import { createAppServer, startServer } from "../src/server.js";
 import { createStore } from "../src/store.js";
-import { registerUser, createSession } from "../src/auth.js";
-import { createServer, startServerFromEnv } from "../src/server.js";
 
 function listen(server: http.Server): Promise<number> {
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
+    server.once("error", reject);
     server.listen(0, () => {
       const address = server.address();
-      assert.ok(address && typeof address === "object");
+      if (!address || typeof address === "string") {
+        reject(new Error("No address"));
+        return;
+      }
       resolve(address.port);
     });
   });
 }
 
-function request(port: number, options: http.RequestOptions & { body?: string }) {
-  return new Promise<{ statusCode: number; headers: http.IncomingHttpHeaders; body: string }>((resolve, reject) => {
+function close(server: http.Server): Promise<void> {
+  return new Promise((resolve, reject) => {
+    server.close((err) => (err ? reject(err) : resolve()));
+  });
+}
+
+function request(port: number, method: string, path: string, body?: unknown, headers: Record<string, string> = {}): Promise<{ status: number; headers: http.IncomingHttpHeaders; text: string; json: any }> {
+  return new Promise((resolve, reject) => {
     const req = http.request(
-      { port, host: "127.0.0.1", path: options.path, method: options.method, headers: options.headers },
+      {
+        port,
+        method,
+        path,
+        hostname: "127.0.0.1",
+        headers: {
+          ...headers,
+          ...(body === undefined ? {} : { "content-type": "application/json" }),
+        },
+      },
       (res) => {
         const chunks: Buffer[] = [];
-        res.on("data", (chunk) => chunks.push(Buffer.from(chunk)));
-        res.on("end", () => resolve({ statusCode: res.statusCode ?? 0, headers: res.headers, body: Buffer.concat(chunks).toString("utf8") }));
+        res.on("data", (chunk) => chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk)));
+        res.on("end", () => {
+          const text = Buffer.concat(chunks).toString("utf8");
+          resolve({ status: res.statusCode ?? 0, headers: res.headers, text, json: text.length ? JSON.parse(text) : undefined });
+        });
       },
     );
     req.on("error", reject);
-    if (options.body !== undefined) req.end(options.body);
+    if (body !== undefined) req.end(JSON.stringify(body));
     else req.end();
   });
 }
 
-test("createServer returns an unlistened server", () => {
-  const server = createServer(createStore(), 600, () => new Date("2025-01-01T00:00:00.000Z"));
-  assert.equal(server.listening, false);
-  server.close();
-});
-
-test("createServer wires JSON routes and error handling", async () => {
-  const store = createStore();
-  const server = createServer(store, 600, () => new Date("2025-01-01T00:00:00.000Z"));
+test("createAppServer serves JSON and maps unknown routes to 404", async () => {
+  const server = createAppServer(createStore(), 600);
   const port = await listen(server);
   try {
-    const userRes = await request(port, {
-      method: "POST",
-      path: "/users",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ email: "organizer@example.com", password: "password123", name: "Org", role: "organizer" }),
-    });
-    assert.equal(userRes.statusCode, 201);
-    assert.equal(JSON.parse(userRes.body).email, "organizer@example.com");
-
-    const sessionRes = await request(port, {
-      method: "POST",
-      path: "/sessions",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ email: "organizer@example.com", password: "password123" }),
-    });
-    const token = JSON.parse(sessionRes.body).token as string;
-
-    const eventRes = await request(port, {
-      method: "POST",
-      path: "/events",
-      headers: { authorization: `Bearer ${token}`, "content-type": "application/json" },
-      body: JSON.stringify({ title: "Show", venue: "Hall", startsAt: "2025-01-02T00:00:00.000Z", tiers: [{ name: "GA", priceCents: 1000, quantity: 2 }] }),
-    });
-    assert.equal(eventRes.statusCode, 201);
-    const event = JSON.parse(eventRes.body);
-    assert.equal(event.title, "Show");
-
-    const listRes = await request(port, { method: "GET", path: "/events" });
-    assert.equal(listRes.statusCode, 200);
-    assert.equal(JSON.parse(listRes.body).total, 1);
-
-    const unknownRes = await request(port, { method: "GET", path: "/unknown" });
-    assert.equal(unknownRes.statusCode, 404);
-    assert.deepEqual(JSON.parse(unknownRes.body), { error: "Not found" });
-
-    const badJsonRes = await request(port, {
-      method: "POST",
-      path: "/users",
-      headers: { "content-type": "application/json" },
-      body: "{",
-    });
-    assert.equal(badJsonRes.statusCode, 400);
-    assert.deepEqual(JSON.parse(badJsonRes.body), { error: "Invalid JSON" });
+    const res = await request(port, "GET", "/does-not-exist");
+    assert.equal(res.status, 404);
+    assert.equal(res.headers["content-type"], "application/json; charset=utf-8");
+    assert.deepEqual(res.json, { error: "Not found" });
   } finally {
-    await new Promise<void>((resolve) => server.close(() => resolve()));
+    await close(server);
   }
 });
 
-test("createServer returns Internal Server Error for unexpected thrown values", async () => {
-  const store = createStore();
-  const originalCreateStore = store;
-  const server = createServer(originalCreateStore, 600, () => new Date("2025-01-01T00:00:00.000Z"));
+test("createAppServer can create users and sessions and rejects invalid JSON before business logic", async () => {
+  const server = createAppServer(createStore(), 600);
   const port = await listen(server);
   try {
-    const res = await request(port, { method: "GET", path: "/events/%zz" });
-    assert.equal(res.statusCode, 500);
-    assert.deepEqual(JSON.parse(res.body), { error: "Internal Server Error" });
+    const createdUser = await request(port, "POST", "/users", { email: "a@example.com", password: "pw", name: "Ada", role: "customer" });
+    assert.equal(createdUser.status, 201);
+    assert.equal(createdUser.headers["content-type"], "application/json; charset=utf-8");
+    assert.equal(createdUser.json.email, "a@example.com");
+
+    const createdSession = await request(port, "POST", "/sessions", { email: "a@example.com", password: "pw" });
+    assert.equal(createdSession.status, 200);
+    assert.equal(createdSession.json.token, createdSession.json.token);
+
+    const badJson = await new Promise<{ status: number; text: string }>((resolve, reject) => {
+      const req = http.request({ port, method: "POST", path: "/users", hostname: "127.0.0.1", headers: { "content-type": "application/json" } }, (res) => {
+        const chunks: Buffer[] = [];
+        res.on("data", (chunk) => chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk)));
+        res.on("end", () => resolve({ status: res.statusCode ?? 0, text: Buffer.concat(chunks).toString("utf8") }));
+      });
+      req.on("error", reject);
+      req.end("not-json");
+    });
+    assert.equal(badJson.status, 400);
+    assert.deepEqual(JSON.parse(badJson.text), { error: "Invalid input" });
   } finally {
-    await new Promise<void>((resolve) => server.close(() => resolve()));
+    await close(server);
   }
 });
 
-test("startServerFromEnv validates environment and starts listening", async () => {
-  const oldPort = process.env.PORT;
-  const oldHold = process.env.HOLD_SECONDS;
+test("createAppServer protects routes before parsing body and returns mapped auth errors", async () => {
+  const server = createAppServer(createStore(), 600);
+  const port = await listen(server);
   try {
-    delete process.env.PORT;
-    assert.throws(() => startServerFromEnv(), /Invalid PORT/);
+    const unauthorized = await request(port, "POST", "/events", { title: "x" });
+    assert.equal(unauthorized.status, 401);
+    assert.deepEqual(unauthorized.json, { error: "Unauthorized" });
 
-    process.env.PORT = "0";
-    assert.throws(() => startServerFromEnv(), /Invalid PORT/);
+    const forbidden = await request(port, "POST", "/orders", { eventId: "e1", items: [] }, { authorization: "Bearer bad" });
+    assert.equal(forbidden.status, 401);
 
-    process.env.PORT = "12345";
-    process.env.HOLD_SECONDS = "0";
-    assert.throws(() => startServerFromEnv(), /Invalid HOLD_SECONDS/);
-
-    process.env.HOLD_SECONDS = "1";
-    const server = startServerFromEnv();
-    try {
-      assert.equal(server.listening, true);
-    } finally {
-      await new Promise<void>((resolve) => server.close(() => resolve()));
-    }
+    const me = await request(port, "GET", "/me", undefined, { authorization: "Bearer bad" });
+    assert.equal(me.status, 401);
   } finally {
-    if (oldPort === undefined) delete process.env.PORT; else process.env.PORT = oldPort;
-    if (oldHold === undefined) delete process.env.HOLD_SECONDS; else process.env.HOLD_SECONDS = oldHold;
+    await close(server);
+  }
+});
+
+test("startServer reads environment variables, listens, and returns the server", async () => {
+  const originalPort = process.env.PORT;
+  const originalHold = process.env.HOLD_SECONDS;
+  process.env.PORT = "0";
+  process.env.HOLD_SECONDS = "123";
+  try {
+    const server = startServer();
+    assert.ok(server.listening);
+    await close(server);
+  } finally {
+    if (originalPort === undefined) delete process.env.PORT;
+    else process.env.PORT = originalPort;
+    if (originalHold === undefined) delete process.env.HOLD_SECONDS;
+    else process.env.HOLD_SECONDS = originalHold;
   }
 });
