@@ -26,6 +26,11 @@ async function scaffold(outDir: string, specName: string): Promise<void> {
 		type: "module",
 		scripts: {
 			build: "tsc",
+			// The entry module is pinned by finish() to the plan's server module
+			// once the plan exists; this default covers runs that never get a plan.
+			// Without a start script, `npm start` fails outright ("Missing script:
+			// "start""), so an HTTP project that only builds can never be served.
+			start: "node dist/server.js",
 			test: "tsc --noEmit && tsx --test test/*.test.ts",
 		},
 		devDependencies: {
@@ -169,6 +174,30 @@ async function main(): Promise<void> {
 }
 
 async function finish(state: FactoryState, startedAt: number, outDir: string): Promise<void> {
+	// Pin the generated package.json's start script to the plan's actual entry
+	// module (the one that starts listening), so `npm start` after `npm run
+	// build` really serves the project. Prefer src/server.ts, then a module
+	// whose responsibility says it starts/listens, then http/index fallbacks.
+	try {
+		const pkgPath = join(outDir, "package.json")
+		const pkg = JSON.parse(await readFile(pkgPath, "utf8")) as {
+			scripts?: Record<string, string>
+		}
+		const modules = state.plan?.modules ?? []
+		const byPath = (suffix: string) => modules.find((m) => m.modulePath.endsWith(suffix))
+		const entry =
+			byPath("src/server.ts") ??
+			modules.find((m) => /listen|PORT|creates the HTTP server/i.test(m.responsibility)) ??
+			byPath("src/http.ts") ??
+			byPath("src/index.ts")
+		if (entry) {
+			const base = basename(entry.modulePath, ".ts")
+			pkg.scripts = { ...(pkg.scripts ?? {}), start: `node dist/${base}.js` }
+			await writeFile(pkgPath, JSON.stringify(pkg, null, 2) + "\n")
+		}
+	} catch {
+		// A start-script fix must never break the run summary.
+	}
 	const durationSec = Math.round((Date.now() - startedAt) / 1000)
 	const totalIn = state.usage.reduce((a, u) => a + u.inputTokens, 0)
 	const totalOut = state.usage.reduce((a, u) => a + u.outputTokens, 0)
