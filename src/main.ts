@@ -30,7 +30,9 @@ async function scaffold(outDir: string, specName: string): Promise<void> {
 			// once the plan exists; this default covers runs that never get a plan.
 			// Without a start script, `npm start` fails outright ("Missing script:
 			// "start""), so an HTTP project that only builds can never be served.
-			start: "node dist/server.js",
+			// dist/src/, not dist/: the tsconfig includes src/ and test/, so tsc
+			// mirrors them under dist/ (dist/src/server.js, dist/test/...).
+			start: "node dist/src/server.js",
 			test: "tsc --noEmit && tsx --test test/*.test.ts",
 		},
 		devDependencies: {
@@ -192,7 +194,7 @@ async function finish(state: FactoryState, startedAt: number, outDir: string): P
 			byPath("src/index.ts")
 		if (entry) {
 			const base = basename(entry.modulePath, ".ts")
-			pkg.scripts = { ...(pkg.scripts ?? {}), start: `node dist/${base}.js` }
+			pkg.scripts = { ...(pkg.scripts ?? {}), start: `node dist/src/${base}.js` }
 			await writeFile(pkgPath, JSON.stringify(pkg, null, 2) + "\n")
 		}
 	} catch {
